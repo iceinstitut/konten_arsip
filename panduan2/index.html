@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Panduan</title>
+    <link rel="icon" href="https://iceinstitut.github.io/image/aset/favicon_icei.png" type="image/png">
+
+    <script>
+      function loadComponent(id, url) {
+        fetch("https://iceinstitut.github.io/konten/" + url).then(response => response.text()).then(data => {
+          document.getElementById(id).innerHTML = data;
+        });
+      }
+      document.addEventListener("DOMContentLoaded", function() {
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+      });
+      fetch("https://iceinstitut.github.io/konten/head.html").then(response => response.text()).then(data => {
+        const temp = document.createElement("div");
+        temp.innerHTML = data;
+        // Proses <link> langsung
+        temp.querySelectorAll("link").forEach(link => {
+          document.head.appendChild(link);
+        });
+        temp.querySelectorAll("script").forEach(oldScript => {
+          const newScript = document.createElement("script");
+          newScript.src = oldScript.src;
+          if (oldScript.defer) newScript.defer = true;
+          document.head.appendChild(newScript);
+        });
+      });
+    </script>
+    <style>
+        body {font-family: Arial, sans-serif; margin:0;}
+
+        .container {padding:20px;}
+
+        .menu-grid {
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+            gap:20px;
+        }
+
+        .menuutama {
+            border:1px solid #eee;
+            padding:20px;
+            text-align:center;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        .menuutama:hover {
+            transform: translateY(-5px);
+            box-shadow:0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        #content-container {
+            display:none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #dynamic-content iframe {
+            width:100%;
+            min-height:80vh;
+            border:none;
+        }
+
+        .back-btn {
+            margin-bottom:15px;
+            padding:8px 12px;
+            cursor:pointer;
+        }
+
+        /* LOADER */
+        #loader {
+            display:none;
+            text-align:center;
+            padding:40px;
+        }
+
+        @keyframes fadeIn {
+            from {opacity:0; transform:translateY(10px);} 
+            to {opacity:1; transform:translateY(0);} 
+        }
+    </style>
+</head>
+
+<body>
+<div id="header"></div>    
+
+<div class="container">
+
+    <!-- MENU -->
+    <div id="menu-container">
+        <h1>Panduan Tim Konten ICE Institute</h1>
+        <div class="menu-grid">
+
+            <div class="menuutama" onclick="loadPanduan('pengembanganmkdaring.html')">
+                Pengembangan Course Self-paced
+            </div>
+
+            <div class="menuutama" onclick="window.location.href='https://kurasi.icei.ac.id/auth/login'">
+                Aplikasi Kurasi
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('form_kurasi.html')">
+                Form Kurasi
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('self_evaluation.html')">
+                Self Evaluation
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('buat_akun_id.html')">
+                Buat Akun (ID)
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('akun_en.html')">
+                Buat Akun (EN)
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('dashboard.html')">
+                Akses Dashboard
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('rerun.html')">
+                Re Run Course
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('pengemasan.html')">
+                Pengemasan Course
+            </div>
+
+        </div>
+    </div>
+    <!-- LOADER -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>Loading konten...</p>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content-container">
+        <button class="back-btn" onclick="backToMenu()">← Kembali</button>
+        <div id="dynamic-content"></div>
+    </div>
+
+</div>
+<div id="footer"></div>
+
+<script>
+
+// ================= CONFIG =================
+function getBaseFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("base");
+}
+
+const CONFIG = {
+    BASE_URL: getBaseFromQuery() || window.location.origin + "/konten/",
+    PATH: {
+        PANDUAN: "panduan/"
+    }
+};
+
+// ================= CACHE =================
+const CACHE = {};
+
+// ================= HELPERS =================
+function sanitizeFile(file) {
+    return file.replace(/^\/+/, "");
+}
+
+function buildPanduanURL(file) {
+    return CONFIG.BASE_URL + CONFIG.PATH.PANDUAN + sanitizeFile(file);
+}
+
+// ================= MAIN =================
+function loadPanduan(file, skipHash = false) {
+    const cleanFile = sanitizeFile(file);
+    const url = buildPanduanURL(cleanFile);
+
+    if (!skipHash) {
+        location.hash = cleanFile;
+    }
+
+    // UI state
+    document.getElementById("menu-container").style.display = "none";
+    document.getElementById("content-container").style.display = "none";
+    document.getElementById("loader").style.display = "block";
+
+    // ================= CACHE HIT =================
+    if (CACHE[url]) {
+        renderContent(CACHE[url]);
+        return;
+    }
+
+    // ================= FETCH =================
+    fetch(url)
+        .then(res => {
+            if (!res.ok) throw new Error("Gagal load: " + url);
+            return res.text();
+        })
+        .then(html => {
+            CACHE[url] = html; // simpan cache
+            renderContent(html);
+        })
+        .catch(err => {
+            console.error(err);
+            showError(url);
+        });
+
+        console.log(
+  document.getElementById("menu-container"),
+  document.getElementById("content-container"),
+  document.getElementById("loader")
+);
+}
+
+// ================= RENDER =================
+function renderContent(html) {
+    const container = document.getElementById("dynamic-content");
+    container.innerHTML = html;
+
+    if (typeof optimizeIframes === "function") {
+        optimizeIframes(container);
+    }
+
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("content-container").style.display = "block";
+}
+
+// ================= ERROR =================
+function showError(url) {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("content-container").style.display = "block";
+
+    document.getElementById("dynamic-content").innerHTML = `
+        <div style="padding:20px;">
+            <h3>Gagal memuat konten</h3>
+            <p>Periksa koneksi atau path file.</p>
+            <small>${url}</small>
+        </div>
+    `;
+}
+
+// ================= NAVIGATION =================
+function backToMenu() {
+    document.getElementById("menu-container").style.display = "block";
+    document.getElementById("content-container").style.display = "none";
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("dynamic-content").innerHTML = "";
+
+    history.replaceState("", document.title, window.location.pathname);
+}
+
+// ================= PREFETCH (OPSIONAL) =================
+function prefetchPanduan(file) {
+    const url = buildPanduanURL(file);
+
+    if (!CACHE[url]) {
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                CACHE[url] = html;
+            })
+            .catch(() => {});
+    }
+}
+
+// ================= HASH LOAD =================
+window.addEventListener("load", () => {
+    if (location.hash) {
+        const file = location.hash.replace("#", "");
+        loadPanduan(file, true); // skip set hash ulang
+    }
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Panduan</title>
+    <link rel="icon" href="https://iceinstitut.github.io/image/aset/favicon_icei.png" type="image/png">
+
+    <script>
+      function loadComponent(id, url) {
+        fetch("https://iceinstitut.github.io/konten/" + url).then(response => response.text()).then(data => {
+          document.getElementById(id).innerHTML = data;
+        });
+      }
+      document.addEventListener("DOMContentLoaded", function() {
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+      });
+      fetch("https://iceinstitut.github.io/konten/head.html").then(response => response.text()).then(data => {
+        const temp = document.createElement("div");
+        temp.innerHTML = data;
+        // Proses <link> langsung
+        temp.querySelectorAll("link").forEach(link => {
+          document.head.appendChild(link);
+        });
+        temp.querySelectorAll("script").forEach(oldScript => {
+          const newScript = document.createElement("script");
+          newScript.src = oldScript.src;
+          if (oldScript.defer) newScript.defer = true;
+          document.head.appendChild(newScript);
+        });
+      });
+    </script>
+    <style>
+        body {font-family: Arial, sans-serif; margin:0;}
+
+        .container {padding:20px;}
+
+        .menu-grid {
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+            gap:20px;
+        }
+
+        .menuutama {
+            border:1px solid #eee;
+            padding:20px;
+            text-align:center;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        .menuutama:hover {
+            transform: translateY(-5px);
+            box-shadow:0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        #content-container {
+            display:none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #dynamic-content iframe {
+            width:100%;
+            min-height:80vh;
+            border:none;
+        }
+
+        .back-btn {
+            margin-bottom:15px;
+            padding:8px 12px;
+            cursor:pointer;
+        }
+
+        @keyframes fadeIn {
+            from {opacity:0; transform:translateY(10px);} 
+            to {opacity:1; transform:translateY(0);} 
+        }
+    </style>
+</head>
+
+<body>
+<div id="header"></div>    
+
+<div class="container">
+
+    <!-- MENU -->
+    <div id="menu-container">
+        <h1>Panduan Tim Konten ICE Institute</h1>
+        <div class="menu-grid">
+
+            <div class="menuutama" onclick="loadPanduan('pengembanganmkdaring.html')">
+                Pengembangan Course Self-paced
+            </div>
+
+            <div class="menuutama" onclick="window.location.href='https://kurasi.icei.ac.id/auth/login'">
+                Aplikasi Kurasi
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('form_kurasi.html')">
+                Form Kurasi
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('self_evaluation.html')">
+                Self Evaluation
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('akun_id.html')">
+                Buat Akun (ID)
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('akun_en.html')">
+                Buat Akun (EN)
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('dashboard.html')">
+                Akses Dashboard
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('rerun.html')">
+                Re Run Course
+            </div>
+
+            <div class="menuutama" onclick="loadPanduan('pengemasan.html')">
+                Pengemasan Course
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content-container">
+        <button class="back-btn" onclick="backToMenu()">← Kembali</button>
+        <div id="dynamic-content"></div>
+    </div>
+
+</div>
+<div id="footer"></div>
+
+<script>
+
+function loadPanduan(file) {
+    location.hash = file;
+
+    document.getElementById("menu-container").style.display = "none";
+    document.getElementById("content-container").style.display = "block";
+
+    fetch("https://iceinstitut.github.io/konten/panduan/" + file)
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("dynamic-content").innerHTML = html;
+        });
+}
+
+function backToMenu() {
+    document.getElementById("menu-container").style.display = "block";
+    document.getElementById("content-container").style.display = "none";
+    document.getElementById("dynamic-content").innerHTML = "";
+
+    history.replaceState("", document.title, window.location.pathname);
+}
+
+// Load from URL hash
+window.addEventListener("load", () => {
+    if (location.hash) {
+        const file = location.hash.replace("#", "");
+        loadPanduan(file);
+    }
+});
+
+</script>
+
+</body>
+</html>
