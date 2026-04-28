@@ -68,13 +68,12 @@
 
         /* Sidebar Styling */
         .sidebar-wrapper {
-            height: 100vh;
-            position: fixed;
-            top: 0;
+            height: calc(100vh - 100px);
+            position: sticky;
+            top: 90px;
             left: 0;
             z-index: 1000;
             padding: 2rem 1.5rem;
-            background-color: var(--sidebar-bg);
             border-right: 1px solid #dee2e6;
             overflow-y: auto;
             width: 280px;
@@ -124,9 +123,7 @@
 
         /* Main Content */
         .main-content {
-            margin-left: 280px;
-            padding: 4rem;
-            max-width: 1000px;
+            padding: 2rem 4rem;
         }
         
         .main-content .judul { 
@@ -445,11 +442,12 @@
 </head>
 
 <body>
+  <div id="header"></div>
     <!-- Header Mobile -->
     <header class="mobile-header shadow-sm">
         <span class="brand-text fw-bold">MODUL PENGEMBANGAN</span>
         <button class="btn btn-outline-danger btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
-            Menu
+            Daftar Isi
         </button>
     </header>
     <!-- Offcanvas Mobile -->
@@ -462,15 +460,16 @@
             <nav id="nav-container-mobile" class="nav-dynamic p-3"></nav>
         </div>
     </div>
-    <div class="container-fluid p-0">
+    <div class="container-fluid" style="top: -20px; position: relative;">
+      <div class="row g-0">
         <!-- Sidebar Desktop -->
-        <aside class="sidebar-wrapper shadow-sm d-none d-lg-block">
+        <aside class="col-lg-3 d-none d-lg-block sidebar-wrapper">
             <div class="sidebar-title">Pengembangan Mata Kuliah Daring Self-Paced</div>
             <hr>
             <nav id="nav-container" class="nav-dynamic flex-column d-flex"></nav>
         </aside>
         <!-- Main Content -->
-        <main class="main-content" id="content-body">
+        <main class="col-12 col-lg-9 main-content px-3" id="content-body">
             <section>
                 <div>
                     <img src="https://iceinstitut.github.io/image/aset/ice-institute-logo-horizontal.png">
@@ -982,7 +981,9 @@
                 <p>Tanis, C. J. (2020). The seven principles of online learning: Feedback from faculty and alumni on its importance for teaching and learning. <em>Research in Learning Technology</em>, <em>28</em>(n.d.), 1-25.</p>
             </section>
         </main>
+      </div>
     </div>
+    <div id="footer"></div>
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
